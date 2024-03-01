@@ -1,0 +1,99 @@
+<% include ./partials/header.ejs %>
+  <div class="w-full min-h-screen bg-black text-white py-5">
+
+    <div class="post  w-full min-h-[50vh] ">
+          <div class="title px-4 flex items-center gap-2">
+            <div class="w-[9vw] h-[9vw] bg-sky-100 rounded-full overflow-hidden">
+              <img src="/images/uploads/<%= post.user.picture %>" alt="">
+            </div>
+            <h4 class="text-sm text-white">
+              <%= post.user.username %>
+            </h4>
+            <h6 class="text-xs opacity-30"> </h6>
+          </div>
+          <div class="relative w-full h-96 mt-4 bg-sky-100 overflow-hidden">
+            <img data-postid="<%= post._id %>" class="postimg w-full h-full object-cover " src="/images/uploads/<%= post.picture %>" alt="">
+          </div>
+          <div class="options w-full px-4 flex justify-between items-center text-[1.4rem]">
+            <div class="flex gap-3 mt-2">
+              <%if(post.like.indexOf(user._id) ==-1){ %>
+                <i class="heart ri-heart-3-line"></i>
+                <% } else{%>
+                <i style="color: red;" class="heart ri-heart-3-fill red"></i>
+                <% } %>
+            <a href="/comment"> <i class=" ri-chat-3-line"></i></a>
+              <i class="ri-share-circle-line"></i>
+            </div>
+            <% if(user.saved.indexOf(post.id) === -1){ %>
+              <i data-postid="<%= post.id %>" class="save ri-bookmark-line"></i>
+           <% } else{ %>
+           <i data-postid="<%= post.id %>" class="save ri-bookmark-fill"></i>
+            <% } %>
+          </div>
+          <h3 class="likevalue px-4 mt-2 text-sm leading-none tracking-tight">
+            <%= post.like.length %> likes
+          </h3>
+          <h2 class="text-white font-light text-sm mt-2">
+            <span class="font-semibold pl-4 pr-2">
+              <%= post.user.username %>
+            </span>
+            <%= post.caption %>
+          </h2>
+        </div>
+    <div class="cmntsection w-full min-h-[30vh] felx items-center flex-col p-4 py-8 ">
+         <h2 class="my-2">comments :</h2>
+         <div class="flex items-center justify-between  py-1 pb-2 rounded-md border-b-[1px] border-[white]">
+             <input  class="cmntinput p-2 px-5 w-full bg-zinc-900 outline-none text-zinc-400" type="text" placeholder="Write Your Comment..">
+             <i dataset-postid="<%=post.id%>" class="sendcmnt ri-send-plane-2-fill bg-[#03AEE4] p-2 px-3"></i>
+        </div>
+       <div class="comments">
+       <% post.comments.forEach((cmnt)=>{ %>
+        <div class="comment min-h-[5vh] w-full flex items-center justify-start my-3">
+            <div class="w-[9vw] h-[9vw] bg-sky-100 rounded-full overflow-hidden">
+                <img src="/images/uploads/<%=cmnt.profile%>" alt="">
+              </div>
+              <h4 class="text-sm text-white ml-2">
+                <%=cmnt.username %> : <%= cmnt.comment %>
+              </h4>
+         </div> 
+      <% }) %>
+       </div>
+        
+    </div>
+  </div>
+  <script>
+    
+ document.querySelector(".sendcmnt").addEventListener("click",async (dets)=>{
+    const postid = `<%=post.id%>`
+    const userid = `<%= user.id %>`
+
+
+  const comment =   document.querySelector(".cmntinput").value;
+  document.querySelector(".cmntinput").value="";
+ 
+  await fetch(`/comment/${postid}`,{
+    method: 'POST',
+    headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({ comment: comment })})
+  .then(raw=>raw.json()).then(commentindb =>{
+    var clutter =""
+    
+    clutter+=`
+         <div class="comment min-h-[5vh] w-full flex items-center justify-start my-3">
+            <div class="w-[9vw] h-[9vw] bg-sky-100 rounded-full overflow-hidden">
+                <img src="/images/uploads/${commentindb.profile}" alt="">
+              </div>
+              <h4 class="text-sm text-white ml-2">
+                ${commentindb.username} : ${commentindb.comment}
+              </h4>
+         </div> 
+         `
+ 
+    document.querySelector(".comments").innerHTML  += clutter;
+  })
+
+ })
+  </script>
+<% include ./partials/footer.ejs %>

@@ -79,20 +79,28 @@
             <h4 class="text-sm">
               <%= post.user.username %>
             </h4>
-            <h6 class="text-xs opacity-30"><%= dater(new Date(post.date)) %></h6>
+            <h6 class="text-xs opacity-30"> </h6>
           </div>
-          <div class="w-full h-96 mt-4 bg-sky-100 overflow-hidden">
-            <img data-postid="<%= post.id %>" class="postimg w-full h-full object-cover" src="/images/uploads/<%= post.picture %>" alt="">
+          <div class="relative w-full h-96 mt-4 bg-sky-100 overflow-hidden">
+            <img data-postid="<%= post._id %>" class="postimg w-full h-full object-cover " src="/images/uploads/<%= post.picture %>" alt="">
           </div>
           <div class="options w-full px-4 flex justify-between items-center text-[1.4rem]">
             <div class="flex gap-3 mt-2">
-              <i class="heart ri-heart-3-line"></i>
-              <i class="ri-chat-3-line"></i>
+              <%if(post.like.indexOf(user._id) ==-1){ %>
+                <i class="heart ri-heart-3-line"></i>
+                <% } else{%>
+                <i style="color: red;" class="heart ri-heart-3-fill red"></i>
+                <% } %>
+            <a href="/comment/<%=post.id%>"> <i class=" ri-chat-3-line"></i></a>
               <i class="ri-share-circle-line"></i>
             </div>
-            <i class="ri-bookmark-line"></i>
+            <% if(user.saved.indexOf(post.id) === -1){ %>
+              <i data-postid="<%= post.id %>" class="save ri-bookmark-line"></i>
+           <% } else{ %>
+           <i data-postid="<%= post.id %>" class="save ri-bookmark-fill"></i>
+            <% } %>
           </div>
-          <h3 class="px-4 mt-2 text-sm leading-none tracking-tight">
+          <h3 class="likevalue px-4 mt-2 text-sm leading-none tracking-tight">
             <%= post.like.length %> likes
           </h3>
           <h2 class="text-white font-light text-sm mt-2">
@@ -105,62 +113,119 @@
         <% }) %>
     </div>
   </div>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.7/axios.min.js" integrity="sha512-NQfB/bDaB8kaSXF8E77JjhHG5PM6XVRxvHzkZiwl3ddWCEPBa23T76MuWSwAJdMGJnmQqM0VeY9kFszsrBEFrQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" integrity="sha512-7eHRwcbYkK4d9g/6tD/mhkf++eoTHwpNM9woBxtPUBWm67zeAfFC+HrdoE2GanKeocly/VxeLvIqwvCdk7qScg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script>
-    function formatRelativeTime(date) {
-      const now = new Date();
-      const diff = now - date;
+    // function formatRelativeTime(date) {
+    //   const now = new Date();
+    //   const diff = now - date;
 
-      // Convert milliseconds to seconds
-      const seconds = Math.floor(diff / 1000);
+    //   // Convert milliseconds to seconds
+    //   const seconds = Math.floor(diff / 1000);
 
-      if (seconds < 60) {
-        return `${seconds}s`;
-      }
+    //   if (seconds < 60) {
+    //     return `${seconds}s`;
+    //   }
 
-      const minutes = Math.floor(seconds / 60);
+    //   const minutes = Math.floor(seconds / 60);
 
-      if (minutes < 60) {
-        return `${minutes}m`;
-      }
+    //   if (minutes < 60) {
+    //     return `${minutes}m`;
+    //   }
 
-      const hours = Math.floor(minutes / 60);
+    //   const hours = Math.floor(minutes / 60);
 
-      if (hours < 24) {
-        return `${hours}h`;
-      }
+    //   if (hours < 24) {
+    //     return `${hours}h`;
+    //   }
 
-      const days = Math.floor(hours / 24);
+    //   const days = Math.floor(hours / 24);
 
-      if (days < 7) {
-        return `${days}d`;
-      }
+    //   if (days < 7) {
+    //     return `${days}d`;
+    //   }
 
-      const weeks = Math.floor(days / 7);
+    //   const weeks = Math.floor(days / 7);
 
-      return `${weeks}w`;
-    }
+    //   return `${weeks}w`;
+    // }
+
+    
   
     document.querySelector(".parent")
     .addEventListener("click", function(dets){
+
+      if(dets.target.classList.contains('heart')){
+        var heart = dets.target
+
+      heart.parentNode.parentNode.parentNode.querySelector('.postimg').click();
+      }
+
+
       if(dets.target.classList.contains("postimg")){
         var heartwithborder = dets.target.parentNode.parentNode.querySelector(".heart");
         if(heartwithborder.classList.contains("ri-heart-3-line")){
           heartwithborder.classList.remove("ri-heart-3-line")
           heartwithborder.classList.add("ri-heart-3-fill")
           heartwithborder.style.color = "red";
-        }
-        else{
+        }else{
           heartwithborder.classList.remove("ri-heart-3-fill")
           heartwithborder.classList.add("ri-heart-3-line")
           heartwithborder.style.color = "white";
         }
-        // fetch(`/like/${dets.target.dataset.postid}`)
-        // .then(raw => raw.json())
-        // .then(response => {
-        //   console.log(response);
-        // })
+
+        fetch(`/like/${dets.target.dataset.postid}`)
+        .then(raw => raw.json())
+        .then(response => {
+          // document.querySelector(".likevalue").textContent= response.like.length + "likes"
+          dets.target.parentNode.parentNode.querySelector(".likevalue").textContent= response.like.length + "likes"
+        })
+      }else if(dets.target.classList.contains("save")){
+        fetch(`/save/${dets.target.dataset.postid}`)
+        // let savebtn = document.querySelector(".save")
+        let savebtn = dets.target
+        if(savebtn.classList.contains("ri-bookmark-line")){
+            savebtn.classList.remove("ri-bookmark-line")
+            savebtn.classList.add("ri-bookmark-fill","white")
+        }else{
+          
+          savebtn.classList.remove("ri-bookmark-fill")
+            savebtn.classList.add("ri-bookmark-line")
+
+        }
+      
+ 
       }
+      
+      if(dets.target.classList.contains('postimg')){
+         
+        var i = document.createElement('i')
+        i.classList.add('ri-heart-3-fill','scale-[2]','absolute','translate-y-[-50%]','translate-x-[-50%]','left-[50%]','top-[60%]')
+        dets.target.parentNode.appendChild(i)
+        console.log( dets.target.parentNode);
+        gsap.from(i,{
+          scale:.5,
+          y:-50,
+          ease:Power4,
+          duration:.3
+        })
+        gsap.to(i,{
+          opacity:.8,
+          y:-50,
+          scale:5,
+          delay:.2,
+          ease:Power4,
+          duration:.5,
+          color:'red',
+          onComplete:function(){
+            i.remove()
+          }
+        })
+      }
+
+      
+
+
     })
   </script>
   <% include ./partials/footer.ejs %>
