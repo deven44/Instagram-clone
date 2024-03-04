@@ -1,0 +1,61 @@
+<% include ./partials/header.ejs %>
+
+<div class="w-full min-h-screen bg-black text-white relative">
+    <div class="linediv flex items-center justify-center gap-1 absolute top-[2%] left-[2vw] w-[96vw]">
+        <% stories.forEach((story, index) => { %>
+            <div style="width: <%= 96 / stories.length %>vw;" class="line h-[3px] w-[20vw] bg-zinc-800 relative">
+                <div class="fill h-[3px] w-0 bg-zinc-100 absolute top-[0%] left-[0%]"></div>
+            </div>
+        <% }) %>
+    </div>
+    <div class="title px-5 w-full flex items-center gap-2 absolute mt-10">
+        <div class="w-[9vw] h-[9vw] bg-sky-100 rounded-full overflow-hidden mr-2">
+            <img src="/images/uploads/<%= storyuser.picture %>" alt="">
+        </div>
+        <h4 class="text-lg">
+            <%= storyuser.username %>
+        </h4>
+        <p></p>
+        <a href="/feed" id="closeButton"><i class="close ri-close-line text-[7vw] absolute right-[5%] top-0 "></i></a>
+    </div>
+
+    <div class="display min-w-[100vw] h-screen flex items-center justify-center overflow-hidden">
+        <% stories.forEach((story, index) => { %>
+            <div class="story" id="story<%= index %>" style="display: <%= index === 0 ? 'block' : 'none' %>;">
+                <img class="img w-full h-full object-cover" src="/images/story/<%= story.picture %>" alt="">
+            </div>
+        <% }) %>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" integrity="sha512-7eHRwcbYkK4d9g/6tD/mhkf++eoTHwpNM9woBxtPUBWm67zeAfFC+HrdoE2GanKeocly/VxeLvIqwvCdk7qScg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+    const tl = gsap.timeline();
+
+    document.querySelectorAll(".fill").forEach(function(fill, index) {
+        tl.to(fill, {
+            duration: 3,
+            width: "100%",
+            onComplete: function() {
+              
+                document.querySelector(`#story${index}`).style.display = 'none';
+
+               
+                if (document.querySelector(`#story${index + 1}`)) {
+                    document.querySelector(`#story${index + 1}`).style.display = 'block';
+                } else {
+                
+                    document.querySelector(".close").click()
+                }
+            }
+        })
+    });
+
+    // Add event listener to the close button
+    document.getElementById("closeButton").addEventListener("click", function() {
+        // Handle the click operation here
+        console.log("Close button clicked!");
+    });
+</script>
+
+<% include ./partials/footer.ejs %>

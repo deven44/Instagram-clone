@@ -1,0 +1,39 @@
+<% include ./partials/header.ejs %>
+  <div class="w-full min-h-screen bg-black text-white py-5">
+    
+    <div class="head  flex gap-6 items-center px-5 ">
+        <i class=" ri-arrow-left-line  text-[7vw]"></i>
+        <h1 class="text-[5.5vw]">notifications</h1>
+    </div>
+
+    <div class="notifications px-5 max-h-fit">
+   
+       <% user.notifications.reverse().forEach((ntfn) =>{ %>
+       
+        <div class="notification min-h-[7vh] w-full flex items-center justify-start my-3">
+            <div class="w-[11vw] h-[11vw] bg-sky-100 rounded-full overflow-hidden">
+                <img src="/images/uploads/<%=ntfn.senderprofile%>" alt="">
+              </div>
+              <h4 class="text-[5.3vw] font-semibold text-zinc-200 ml-3"><%= ntfn.sender %></h4>
+              <% if(ntfn.notification){ %>
+                <h4 class="text-[3.5vw] font-medium text-zinc-300 ml-2 "><%= ntfn.notification %></h4>
+              <% } %>
+              <% if(ntfn.comment){ %>
+                <h4 class="text-[3.5vw] font-semibold text-white ml-2  max-w-[60vw]"><span class="text-[3.6vw] text-zinc-400 ">commented on your post : </span> <%=  ntfn.comment %></h4>
+                <div class="w-[11vw] h-[11vw] bg-sky-100 overflow-hidden absolute right-5">
+                    <img src="/images/uploads/<%=ntfn.postimg%>" alt="">
+                  </div>
+              <% } %>
+              <% if(ntfn.like){ %>
+                <h4 class="text-[3.5vw] font-semibold text-zinc-400 ml-2 "></span> <%= ntfn.like %></h4>
+                <div class="w-[11vw] h-[11vw] bg-sky-100 overflow-hidden absolute right-5">
+                    <img src="/images/uploads/<%=ntfn.postimg%>" alt="">
+                  </div>
+                <% } %>
+         </div>
+  
+        <%  }) %>
+        
+       
+  </div>
+<% include ./partials/footer.ejs %>

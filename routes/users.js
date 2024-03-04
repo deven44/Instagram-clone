@@ -30,18 +30,18 @@ const userSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "post" 
   }],
-  followers: [
-    {
+  followers: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: "user" 
-    } 
-  ],
-  following: [
-    {
+    } ],
+  following: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: "user" 
-    }
-  ]
+    }],
+    notifications:[{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "notification" 
+    }]
 })
 
 userSchema.plugin(plm);

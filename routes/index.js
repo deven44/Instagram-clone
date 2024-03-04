@@ -4,9 +4,12 @@ const passport = require('passport');
 const localStrategy = require('passport-local');
 const userModel = require('./users');
 const postModel = require('./posts');
+const notificationModel = require('./notifications.js');
+const storyModel = require('./stories.js');
 const commentModel = require('./comments.js');
 passport.use(new localStrategy(userModel.authenticate()));
 const upload = require("./multer");
+const storyupload = require("./storymulter.js");
 const utils = require('../utils/utils');
 
 // GET
@@ -18,19 +21,47 @@ router.get('/login', function(req, res) {
   res.render('login', {footer: false});
 });
 
-router.get('/like/:postid', async function(req, res) {
-  const post = await postModel.findOne({_id: req.params.postid});
+router.get('/like/:postid', isLoggedIn, async function(req, res) {
+  const post = await postModel.findOne({_id: req.params.postid}).populate('user');
   const user = await userModel.findOne({username: req.session.passport.user});
-  if(post.like.indexOf(user._id) === -1){
-      post.like.push(user._id)
+  //notifications logic:
+  await notificationModel.create({
+    sender: user.username,
+    receiver:post.user.username,
+    senderprofile:user.picture,
+    like:"Liked your post.",
+    postimg:post.picture
+    })
+   let notification = await notificationModel.findOne({
+    sender: user.username,
+     receiver:post.user.username,
+     senderprofile:user.picture,
+      like:"Liked your post.",
+      postimg:post.picture,
+     })
+  const postuser = await userModel.findOne({_id:post.user._id})
     
-   }else{
-     post.like.splice(post.like.indexOf(user._id),1)
-   
-   }
-   await post.save()
+    if(post.like.indexOf(user._id) === -1){
+      post.like.push(user._id)
 
-  res.json(post);
+    
+ 
+
+    await postuser.notifications.push(notification._id);
+    
+    //
+    
+  }else{
+    post.like.splice(post.like.indexOf(user._id),1)
+    
+   postuser.notifications.splice(postuser.notifications.indexOf(notification._id),1);
+    
+  }
+  await post.save()
+  await user.save();
+  await postuser.save()
+  
+    res.json(post);
 
 });
 router.get('/save/:postid', async function(req, res) {
@@ -58,21 +89,38 @@ router.get('/comment/:postid', isLoggedIn, async function(req, res) {
 router.post('/comment/:postid', isLoggedIn, async function(req, res) {
   const comment = req.body.comment; 
   let loguser = await userModel.findOne({username: req.session.passport.user})
-  const post = await postModel.findOne({_id:req.params.postid}).populate('comments')
+  const post = await postModel.findOne({_id:req.params.postid}).populate('comments','user')
   const commentindb = await commentModel.create({
-    
     username:loguser.username,
     profile:loguser.picture,
     comment:comment,
     postid:post._id,
   })
-  console.log(comment)
-
  
-   
-   await post.comments.push(commentindb._id)
-   await post.save();
+  await post.comments.push(commentindb._id)
+  await post.save();
 
+//notification logic
+  await notificationModel.create({
+    sender: loguser.username,
+    receiver:post.user.username,
+    senderprofile:loguser.picture,
+    comment:comment,
+    postimg:post.picture
+    })
+  const notification = await notificationModel.findOne({
+    sender: loguser.username,
+     receiver:post.user.username,
+     senderprofile:loguser.picture,
+     comment:comment,
+     postimg:post.picture
+     })
+  const postuser = await userModel.findOne({_id:post.user._id})
+  console.log(postuser)
+  
+
+  await postuser.notifications.push(notification._id);
+   await  postuser.save();
    
    res.json(commentindb);
   
@@ -85,10 +133,25 @@ router.get('/feed', isLoggedIn, async function(req, res) {
   .findOne({username: req.session.passport.user})
   .populate("posts");
 
+let  allusers = await userModel.find().populate("stories");
  let posts = await postModel.find().populate("user")
 
-
-  res.render('feed', {footer: true, user,posts});
+ 
+ let allstories = await storyModel.find().populate("user") 
+ let stories = [];
+ allstories.forEach(async (story)=>{
+  if(story.expirationTime > story.timestamp){
+    stories.push(story);
+   
+  }else{
+    await storyModel.findOneAndDelete({_id:story._id})
+    const storyuser=  await userModel.findOne({username:story.user.username})
+    let index = storyuser.stories.indexOf(story._id)
+    storyuser.stories.splice(index,1)
+  }
+ })
+console.log(stories.user)
+  res.render('feed', {footer: true, user,posts,stories ,allusers});
 });
 
 router.get('/profile', isLoggedIn, async function(req, res) {
@@ -125,16 +188,45 @@ router.get('/follow/:username', isLoggedIn, async function(req, res) {
   let followkarnewala = await userModel.findOne({username: req.session.passport.user}).populate("posts")
   let followhonewala = await userModel.findOne({username: req.params.username}).populate("posts")
 
+  //follow notification logic
+  await notificationModel.create({
+    sender:followkarnewala.username,
+    receiver:followhonewala.username,
+    senderprofile:followkarnewala.picture,
+    notification:"Started following you."
+   })
+
+  const notification = await notificationModel.findOne({
+    sender:followkarnewala.username,
+    receiver:followhonewala.username,
+    senderprofile:followkarnewala.picture,
+    notification:"Started following you."
+  })
+
   if(followhonewala.followers.indexOf(followkarnewala._id)=== -1){
     followhonewala.followers.push(followkarnewala._id)
     followkarnewala.following.push(followhonewala._id)
+
+   
+    await followhonewala.notifications.push(notification._id);
+
+
   }else{
     followhonewala.followers.splice(followhonewala.followers.indexOf(followkarnewala._id),1)
     followkarnewala.following.splice(followhonewala.following.indexOf(followhonewala._id),1)
+    //follow notification logic
+    followhonewala.notifications.splice(followhonewala.notifications.indexOf(notification._id),1);
+
   }
   await followkarnewala.save()
   await followhonewala.save()
  res.redirect("back")
+});
+
+router.get('/notifications/:userid', isLoggedIn, async function(req, res) {
+  let user = await userModel.findOne({username: req.session.passport.user}).populate('notifications')
+  res.render('notifications',{footer: true, user})
+ 
 });
 
 
@@ -175,6 +267,29 @@ router.post('/upload', isLoggedIn, upload.single('image'), async function(req, r
   user.picture = req.file.filename;
   await user.save();
   res.redirect('/edit');
+});
+
+router.post('/uploadstory', isLoggedIn, storyupload.single('story'), async function(req, res) {
+  const user = await userModel.findOne({username: req.session.passport.user});
+  const story = await storyModel.create({
+    user: user._id,
+    picture: req.file.filename,
+  });
+  await user.stories.push(story._id)
+  await user.save();
+  res.redirect('feed');
+
+});
+
+router.get('/story/:storyuserid', isLoggedIn, async function(req, res) {
+  const user = await userModel.findOne({username: req.session.passport.user});
+  const storyuser = await userModel.findOne({_id: req.params.storyuserid});
+   const stories = await storyModel.find({user:req.params.storyuserid})
+   console.log(stories)
+ 
+  
+ return res.render('story',{footer:true,user,storyuser,stories});
+
 });
 
 // POST

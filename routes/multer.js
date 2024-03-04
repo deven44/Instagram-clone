@@ -12,6 +12,16 @@ const storage = multer.diskStorage({
     cb(null, fn);
   },
 });
+const storystorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "./public/images/story");
+  },
+  filename: function (req, file, cb) {
+    const fn =
+      crypto.randomBytes(16).toString("hex") + path.extname(file.originalname);
+    cb(null, fn);
+  },
+});
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage: storage,storystorage:storystorage });
 module.exports = upload;
