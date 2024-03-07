@@ -2,7 +2,7 @@
   <div class="w-full min-h-screen bg-black text-white py-5">
     
     <div class="head  flex gap-6 items-center px-5 ">
-        <i class=" ri-arrow-left-line  text-[7vw]"></i>
+      <a href="/feed">  <i class=" ri-arrow-left-line  text-[7vw]"></i></a>
         <h1 class="text-[5.5vw]">notifications</h1>
     </div>
 
@@ -11,10 +11,10 @@
        <% user.notifications.reverse().forEach((ntfn) =>{ %>
        
         <div class="notification min-h-[7vh] w-full flex items-center justify-start my-3">
-            <div class="w-[11vw] h-[11vw] bg-sky-100 rounded-full overflow-hidden">
+            <div class="w-[10vw] h-[10vw] bg-sky-100 rounded-full overflow-hidden">
                 <img src="/images/uploads/<%=ntfn.senderprofile%>" alt="">
               </div>
-              <h4 class="text-[5.3vw] font-semibold text-zinc-200 ml-3"><%= ntfn.sender %></h4>
+              <h4 class="text-[4vw] font-semibold text-zinc-200 ml-3"><%= ntfn.sender %></h4>
               <% if(ntfn.notification){ %>
                 <h4 class="text-[3.5vw] font-medium text-zinc-300 ml-2 "><%= ntfn.notification %></h4>
               <% } %>

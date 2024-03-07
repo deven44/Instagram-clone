@@ -30,32 +30,47 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" integrity="sha512-7eHRwcbYkK4d9g/6tD/mhkf++eoTHwpNM9woBxtPUBWm67zeAfFC+HrdoE2GanKeocly/VxeLvIqwvCdk7qScg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
+
     const tl = gsap.timeline();
+    var flag= 0;
 
-    document.querySelectorAll(".fill").forEach(function(fill, index) {
-        tl.to(fill, {
-            duration: 3,
-            width: "100%",
-            onComplete: function() {
-              
-                document.querySelector(`#story${index}`).style.display = 'none';
+  
+    const fills = document.querySelectorAll(".fill")
+    fills.forEach(function(fill, index) {
+       
 
-               
-                if (document.querySelector(`#story${index + 1}`)) {
-                    document.querySelector(`#story${index + 1}`).style.display = 'block';
-                } else {
-                
-                    document.querySelector(".close").click()
-                }
-            }
-        })
+              tl.to(fill, {
+                  duration: 3,
+                  width: "100%",
+             
+                  onComplete: function() {
+                 
+                      document.querySelector(`#story${index}`).style.display = 'none';
+                     
+                     
+                      if (document.querySelector(`#story${index + 1}`)) {
+                          document.querySelector(`#story${index + 1}`).style.display = 'block';
+                      } else {
+                      
+                          document.querySelector(".close").click()
+                      }
+                  }
+                  
+              })
+      
+ 
     });
-
+   
+    tl.play();
     // Add event listener to the close button
     document.getElementById("closeButton").addEventListener("click", function() {
         // Handle the click operation here
         console.log("Close button clicked!");
     });
+
+    // back - forword stories event listener
+   
+
 </script>
 
 <% include ./partials/footer.ejs %>

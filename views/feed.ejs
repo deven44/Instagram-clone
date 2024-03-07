@@ -53,11 +53,13 @@
      
       
     </div>
-
-    <form id="storyform" action="/uploadstory" class="w-full py-10 mt-40 hidden bg-white " enctype="multipart/form-data" method="post">
+  <div id="storyform" class="flex items-center  justify-center gap-1"  style="display : none">
+    <form   action="/uploadstory" class="w-full py-5 mt-6 flex items-center  justify-center flex-col gap-2 "  enctype="multipart/form-data" method="post">
       <input hidden type="file" name="story">
-      <input class="submit w-full px-2 py-2 bg-blue-500 rounded-md" type="submit" value="Post">
-  </form>
+      <input class="submit w-[80vw] px-2 py-2 bg-blue-500 rounded-md" type="submit" value="Upload story">
+    </form>
+    <a href="/feed"><button class=" w-[80vw] px-1 py-2 bg-zinc-700 rounded-md ml-11">Cancel</button></a>
+  </div>
 
     <div class="posts parent mb-20">
       <% posts.reverse().forEach(function(post){ %>
@@ -107,39 +109,16 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" integrity="sha512-7eHRwcbYkK4d9g/6tD/mhkf++eoTHwpNM9woBxtPUBWm67zeAfFC+HrdoE2GanKeocly/VxeLvIqwvCdk7qScg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script>
     
-    function timeSinceUpload(uploadDate) {
-    const millisecondsPerMinute = 60 * 1000;
-    const millisecondsPerHour = millisecondsPerMinute * 60;
-    const millisecondsPerDay = millisecondsPerHour * 24;
-    const millisecondsPerMonth = millisecondsPerDay * 30; // Assuming a month has 30 days
-
-    const currentTime = new Date();
-    const uploadTime = new Date(uploadDate);
-
-    const elapsedTime = currentTime - uploadTime;
-
-    if (elapsedTime < millisecondsPerMinute) {
-        return Math.floor(elapsedTime / 1000) + " seconds ago";
-    } else if (elapsedTime < millisecondsPerHour) {
-        return Math.floor(elapsedTime / millisecondsPerMinute) + " minutes ago";
-    } else if (elapsedTime < millisecondsPerDay) {
-        return Math.floor(elapsedTime / millisecondsPerHour) + " hours ago";
-    } else if (elapsedTime < millisecondsPerMonth) {
-        return Math.floor(elapsedTime / millisecondsPerDay) + " days ago";
-    } else {
-        const months = Math.floor(elapsedTime / millisecondsPerMonth);
-        return months + (months === 1 ? " month ago" : " months ago");
-    }
-}
-   console.log(timeSinceUpload("2024-02-26T12:00:00"))
+   
 
     document.querySelector("#selectpic")
     .addEventListener("click", function(){
       document.querySelector("#storyform").style.display='initial';
         document.querySelector("#storyform input").click();
     });
+
     document.querySelector("#storyform .submit").addEventListener('click',function(){
-      document.querySelector("#storyform").style.display='hidden';
+      document.querySelector("#storyform").style.display='none';
     })
 
   
