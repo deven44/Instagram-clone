@@ -10,23 +10,27 @@
     </div>
     <div class="title px-5 w-full flex items-center gap-2 absolute mt-10">
         <div class="w-[9vw] h-[9vw] bg-sky-100 rounded-full overflow-hidden mr-2">
-            <img src="/images/uploads/<%= storyuser.picture %>" alt="">
+            <img src="<%= storyuser.picture %>" alt="">
         </div>
         <h4 class="text-lg">
             <%= storyuser.username %>
         </h4>
+        
         <p></p>
         <a href="/feed" id="closeButton"><i class="close ri-close-line text-[7vw] absolute right-[5%] top-0 "></i></a>
     </div>
 
     <div class="display min-w-[100vw] h-screen flex items-center justify-center overflow-hidden">
         <% stories.forEach((story, index) => { %>
-            <div class="story" id="story<%= index %>" style="display: <%= index === 0 ? 'block' : 'none' %>;">
-                <img class="img w-full h-full object-cover" src="/images/story/<%= story.picture %>" alt="">
+            <div class="story " id="story<%= index %>" style="display: <%= index === 0 ? 'block' : 'none' %>;">
+                <img class="img w-[96vw] h-[96vh] object-cover " src="<%= story.picture %>" alt="">
+                <h6 class="text-[4vw] opacity-30 absolute top-[5%] right-[15%]">
+                    <%= dater(new Date(story.timestamp)) %>
+                  </h6>
             </div>
         <% }) %>
     </div>
-</div>
+</div>`
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" integrity="sha512-7eHRwcbYkK4d9g/6tD/mhkf++eoTHwpNM9woBxtPUBWm67zeAfFC+HrdoE2GanKeocly/VxeLvIqwvCdk7qScg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>

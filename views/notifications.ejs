@@ -12,7 +12,7 @@
        
         <div class="notification min-h-[7vh] w-full flex items-center justify-start my-3">
             <div class="w-[10vw] h-[10vw] bg-sky-100 rounded-full overflow-hidden">
-                <img src="/images/uploads/<%=ntfn.senderprofile%>" alt="">
+                <img src="<%=ntfn.senderprofile%>" alt="">
               </div>
               <h4 class="text-[4vw] font-semibold text-zinc-200 ml-3"><%= ntfn.sender %></h4>
               <% if(ntfn.notification){ %>
@@ -21,13 +21,13 @@
               <% if(ntfn.comment){ %>
                 <h4 class="text-[3.5vw] font-semibold text-white ml-2  max-w-[60vw]"><span class="text-[3.6vw] text-zinc-400 ">commented on your post : </span> <%=  ntfn.comment %></h4>
                 <div class="w-[11vw] h-[11vw] bg-sky-100 overflow-hidden absolute right-5">
-                    <img src="/images/uploads/<%=ntfn.postimg%>" alt="">
+                    <img src="<%=ntfn.postimg%>" alt="">
                   </div>
               <% } %>
               <% if(ntfn.like){ %>
                 <h4 class="text-[3.5vw] font-semibold text-zinc-400 ml-2 "></span> <%= ntfn.like %></h4>
                 <div class="w-[11vw] h-[11vw] bg-sky-100 overflow-hidden absolute right-5">
-                    <img src="/images/uploads/<%=ntfn.postimg%>" alt="">
+                    <img src="<%=ntfn.postimg%>" alt="">
                   </div>
                 <% } %>
          </div>

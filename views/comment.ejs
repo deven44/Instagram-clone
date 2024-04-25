@@ -4,7 +4,7 @@
     <div class="post  w-full min-h-[50vh] ">
           <div class="title px-4 flex items-center gap-2">
             <div class="w-[9vw] h-[9vw] bg-sky-100 rounded-full overflow-hidden">
-              <img src="/images/uploads/<%= post.user.picture %>" alt="">
+              <img src="<%= post.user.picture %>" alt="">
             </div>
             <h4 class="text-sm text-white">
               <%= post.user.username %>
@@ -12,7 +12,7 @@
             <h6 class="text-xs opacity-30"> </h6>
           </div>
           <div class="relative w-full h-96 mt-4 bg-sky-100 overflow-hidden">
-            <img data-postid="<%= post._id %>" class="postimg w-full h-full object-cover " src="/images/uploads/<%= post.picture %>" alt="">
+            <img data-postid="<%= post._id %>" class="postimg w-full h-full object-cover " src="<%= post.picture %>" alt="">
           </div>
           <div class="options w-full px-4 flex justify-between items-center text-[1.4rem]">
             <div class="flex gap-3 mt-2">
@@ -50,7 +50,7 @@
        <% post.comments.forEach((cmnt)=>{ %>
         <div class="comment min-h-[5vh] w-full flex items-center justify-start my-3">
             <div class="w-[9vw] h-[9vw] bg-sky-100 rounded-full overflow-hidden">
-                <img src="/images/uploads/<%=cmnt.profile%>" alt="">
+                <img src="<%=cmnt.profile%>" alt="">
               </div>
               <h4 class="text-sm text-white ml-2">
                 <%=cmnt.username %> : <%= cmnt.comment %>
@@ -83,7 +83,7 @@
     clutter+=`
          <div class="comment min-h-[5vh] w-full flex items-center justify-start my-3">
             <div class="w-[9vw] h-[9vw] bg-sky-100 rounded-full overflow-hidden">
-                <img src="/images/uploads/${commentindb.profile}" alt="">
+                <img src="${commentindb.profile}" alt="">
               </div>
               <h4 class="text-sm text-white ml-2">
                 ${commentindb.username} : ${commentindb.comment}

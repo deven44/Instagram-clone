@@ -10,8 +10,11 @@ const storySchema = mongoose.Schema({
     },
     expirationTime: {
       type: Date,
-      default: () => new Date(+new Date() + 24 * 60 * 60 * 1000), // 24 hours in milliseconds
-    },
+      default: function() {
+          // Calculate expiration time 24 hours after timestamp
+          return new Date(this.timestamp.getTime() + 24 * 60 * 60 * 1000);
+      }
+  },
 })
 
 module.exports = mongoose.model("story",storySchema);

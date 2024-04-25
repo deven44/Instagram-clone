@@ -7,10 +7,21 @@ const postModel = require('./posts');
 const notificationModel = require('./notifications.js');
 const storyModel = require('./stories.js');
 const commentModel = require('./comments.js');
+const messageModel = require('./message.js');
 passport.use(new localStrategy(userModel.authenticate()));
 const upload = require("./multer");
 const storyupload = require("./storymulter.js");
 const utils = require('../utils/utils');
+const fs = require('fs')
+const axios = require('axios')
+const bcrypt = require('bcrypt');
+const cloudinary = require('cloudinary').v2;
+require('dotenv').config();
+cloudinary.config({ 
+  cloud_name: 'dsnakijs3', 
+  api_key: '766361988113194', 
+  api_secret: 'U9vr2n7J5M8WwuKKlngjnkK_CIM'
+});
 
 // GET
 router.get('/', function(req, res) {
@@ -140,9 +151,13 @@ let  allusers = await userModel.find().populate("stories");
  let allstories = await storyModel.find().populate("user") 
  let stories = [];
  allstories.forEach(async (story)=>{
-  if(story.expirationTime > story.timestamp){
-    stories.push(story);
-   
+  const particularDate = new Date(story.timestamp);
+  const currentDate = new Date();
+  const timeDifferenceMs = currentDate - particularDate;
+  const hoursPassed = timeDifferenceMs / (1000 * 60 * 60);
+   console.log(hoursPassed)
+  if(hoursPassed<24){
+    stories.push(story);  
   }else{
     await storyModel.findOneAndDelete({_id:story._id})
     const storyuser=  await userModel.findOne({username:story.user.username})
@@ -151,7 +166,7 @@ let  allusers = await userModel.find().populate("stories");
   }
  })
 console.log(stories.user)
-  res.render('feed', {footer: true, user,posts,stories ,allusers});
+  res.render('feed', {footer: true, user,posts,stories ,allusers,  dater: utils.formatRelativeTime,});
 });
 
 router.get('/profile', isLoggedIn, async function(req, res) {
@@ -250,33 +265,47 @@ router.post('/update', isLoggedIn, async function(req, res) {
   });
 });
 
+
+
+
 router.post('/post', isLoggedIn, upload.single("image"), async function(req, res) {
   const user = await userModel.findOne({username: req.session.passport.user});
-  const post = await postModel.create({
-    user: user._id,
-    caption: req.body.caption,
-    picture: req.file.filename,
+  cloudinary.uploader.upload(req.file.path,async (err,result)=>{
+   
+    const post = await postModel.create({
+      user: user._id,
+      caption: req.body.caption,
+      picture: result.secure_url,
+    })
+    user.posts.push(post._id);
+    await user.save();
+    
   })
-  user.posts.push(post._id);
-  await user.save();
+
+  
   res.redirect("/profile");
 });
 
 router.post('/upload', isLoggedIn, upload.single('image'), async function(req, res) {
   const user = await userModel.findOne({username: req.session.passport.user});
-  user.picture = req.file.filename;
-  await user.save();
+  cloudinary.uploader.upload(req.file.path,async (err,result)=>{
+    user.picture =result.secure_url;
+    await user.save();
+  })
   res.redirect('/edit');
 });
 
 router.post('/uploadstory', isLoggedIn, storyupload.single('story'), async function(req, res) {
   const user = await userModel.findOne({username: req.session.passport.user});
-  const story = await storyModel.create({
-    user: user._id,
-    picture: req.file.filename,
-  });
-  await user.stories.push(story._id)
-  await user.save();
+  cloudinary.uploader.upload(req.file.path,async (err,result)=>{
+
+    const story = await storyModel.create({
+      user: user._id,
+      picture: result.secure_url,
+    });
+    await user.stories.push(story._id)
+    await user.save();
+  })
   res.redirect('feed');
 
 });
@@ -288,11 +317,60 @@ router.get('/story/:storyuserid', isLoggedIn, async function(req, res) {
    console.log(stories)
  
   
- return res.render('story',{footer:true,user,storyuser,stories});
+ return res.render('story',{footer:true,user,storyuser,stories, dater: utils.formatRelativeTime,});
 
 });
 
 // POST
+router.get('/messageList',isLoggedIn , async function(req, res) {
+  const user = await userModel.findOne({username:req.session.passport.user}).populate('following').populate('followers')
+
+const combinedArray = user.following.concat(user.followers);
+
+const objectMap = new Map();
+
+// Iterate through the array of objects
+combinedArray.forEach(obj => {
+    // If the ID is not in the map, add the object to the map
+    if (!objectMap.has(obj._id.toString())) {
+        objectMap.set(obj._id.toString(), obj);
+    }
+});
+
+// Convert the map values back to an array
+const messageUserArray = Array.from(objectMap.values());
+
+  res.render('messageUsers.ejs',{footer:true,user,messageUserArray});
+});
+
+router.get('/message/:oppositeUserId',isLoggedIn , async function(req, res) {
+
+  const user = await userModel.findOne({username:req.session.passport.user}).populate('following').populate('followers')
+  const oppositeUser = await userModel.findOne({_id:req.params.oppositeUserId})
+
+  res.render('chat.ejs',{footer:false,user,oppositeUser});
+});
+
+router.get('/getMessage/:oppositeUserId',isLoggedIn, async function(req,res,next){
+  const user = await userModel.findOne({username:req.session.passport.user}).populate('following').populate('followers')
+  const oppositeUser = await userModel.findOne({username:req.params.oppositeUserId})
+
+  const messages = await messageModel.find({
+    $or:[
+      {
+        sender:user.username,
+        receiver:oppositeUser.username
+      },
+      {
+        receiver:user.username,
+        sender:oppositeUser.username
+      },
+    ]
+  })
+
+  res.json(messages)
+
+})
 
 router.post('/register', function(req, res) {
   const user = new userModel({

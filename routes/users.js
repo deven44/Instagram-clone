@@ -41,7 +41,8 @@ const userSchema = mongoose.Schema({
     notifications:[{
       type: mongoose.Schema.Types.ObjectId,
       ref: "notification" 
-    }]
+    }],
+    socketId: { type: String }
 })
 
 userSchema.plugin(plm);
